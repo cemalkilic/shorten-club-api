@@ -40,13 +40,10 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc{
         fmt.Printf("\nauth token:: %s\n", authToken)
 
         if !strings.HasPrefix(authToken, BearerSchema) {
-            return
-            /*
             c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
                 "error": "Authorization token must be type of Bearer!",
             })
             return
-            */
         }
 
         tokenString := authToken[len(BearerSchema):]
@@ -72,6 +69,7 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc{
             c.JSON(http.StatusUnauthorized, gin.H{
                 "error": "Given JWT is invalid!",
             })
+            return
         }
     }
 }

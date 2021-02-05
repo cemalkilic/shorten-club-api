@@ -63,6 +63,14 @@ func (controller *LoginController) Login(c *gin.Context) {
 }
 
 func (controller *LoginController) Signup(c *gin.Context) {
+    // Hacky way to pass user creation if authorization header exists
+    authToken := c.GetHeader("Authorization")
+    if authToken != "" {
+        fmt.Print("Request with authorization header. Skipping create user!")
+        c.Next()
+        return
+    }
+
     var credential models.User
 
     credential.Username = getRandomUsername("random")
