@@ -7,7 +7,7 @@ services:
       MYSQL_PASS: root
       MYSQL_DB: shorten
       MYSQL_PORT: 3306
-      MYSQL_HOST: db_mysql
+      MYSQL_HOST: db_mysql2
     depends_on:
       - database
     ports:
@@ -23,6 +23,7 @@ services:
       - "3306:3306"
     volumes:
       - db-data/:/var/lib/mysql
+      - "./database/scripts/schema.sql:/docker-entrypoint-initdb.d/1.sql"
       - $HOME/Desktop/MySQL-Snippets/school.sql:/school.sql
 volumes:
   db-data:

@@ -7,13 +7,13 @@ import (
     "github.com/cemalkilic/shorten-backend/middlewares"
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/cemalkilic/shorten-backend/utils/validator"
-    //"github.com/gin-contrib/cors"
+    "github.com/gin-contrib/cors"
     "github.com/gin-gonic/gin"
 )
 
 func main() {
     router := gin.Default()
-    //router.Use(cors.Default())
+    router.Use(cors.Default())
 
 
     cfg, _ := config.LoadConfig(".")

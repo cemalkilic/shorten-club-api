@@ -4,7 +4,6 @@ import (
     "database/sql"
     "encoding/json"
     "errors"
-    "fmt"
     "github.com/cemalkilic/shorten-backend/models"
     _ "github.com/go-sql-driver/mysql"
     "log"
@@ -99,12 +98,9 @@ func (s *sqlDatabase) SelectBySlug(slug string) (models.Record, error) {
         return models.Record{}, err
     }
 
-    fmt.Printf("\n\n\ndatabase read content: %#v\n\n", contentResp)
     result := contentResp
     //var result map[string]interface{}
     //json.Unmarshal([]byte(contentResp), &result)
-
-    fmt.Printf("\n\n\ndatabase read result: %#v\n\n", result)
 
     return models.Record{
         ID:         idResp,
