@@ -85,7 +85,7 @@ func (s *sqlDatabase) SelectBySlug(slug string) (models.Record, error) {
     var idResp int64
     var usernameResp string
     var slugResp string
-    var contentResp interface{}
+    var contentResp string
     var expire_at time.Time
     var created_at time.Time
     var updated_at time.Time
@@ -98,9 +98,8 @@ func (s *sqlDatabase) SelectBySlug(slug string) (models.Record, error) {
         return models.Record{}, err
     }
 
-    result := contentResp
-    //var result map[string]interface{}
-    //json.Unmarshal([]byte(contentResp), &result)
+    var result interface{}
+    _ = json.Unmarshal([]byte(contentResp), &result)
 
     return models.Record{
         ID:         idResp,
