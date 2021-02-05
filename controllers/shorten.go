@@ -2,7 +2,6 @@ package controllers
 
 import (
     "encoding/json"
-    "fmt"
     "github.com/cemalkilic/shorten-backend/database"
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/cemalkilic/shorten-backend/utils/validator"
@@ -26,38 +25,11 @@ func (cec *ShortenController) SetDB(dataStore database.DataStore) {
     cec.dataStore = dataStore
 }
 
-func (cec *ShortenController) AddRecord(c *gin.Context) {
-    var addEndpointRequest service.AddRecordParams
-    _ = c.ShouldBindJSON(&addEndpointRequest)
-
-    ctxUsername, exists := c.Get("username")
-    if exists {
-        addEndpointRequest.Username = fmt.Sprintf("%s", ctxUsername)
-    }
-
-    srv := service.NewService(cec.dataStore, cec.validator)
-    response, err := srv.AddRecord(addEndpointRequest)
-    if err != nil {
-        internalError(c, err)
-        return
-    }
-
-    if e, ok := response.Err.(error); ok && e != nil {
-        internalError(c, e)
-        return
-    }
-
-    //fullEndpointURL := utils.GetFullHTTPUrl(c.Request.Host, response.Endpoint, c.Request.TLS != nil)
-    c.JSON(200, response.Record)
-}
-
 func (cec *ShortenController) GetContent(c *gin.Context) {
     url := c.Request.URL.Path
 
-    username := c.Query("username")
-
     srv := service.NewService(cec.dataStore, cec.validator)
-    response, err := srv.GetContentBySlug(service.GetContentParams{Slug: url, Username: username})
+    response, err := srv.GetContentBySlug(service.GetContentParams{Slug: url})
     if err != nil {
         internalError(c, err)
         return
@@ -68,30 +40,33 @@ func (cec *ShortenController) GetContent(c *gin.Context) {
         return
     }
 
-    //c.DataFromReader(http.StatusOK,
-    //    int64(len(response.Username)),
-    //    gin.MIMEJSON,
-    //    strings.NewReader(response.Username), nil)
+    record := response.Record
+    permissions, _ := cec.getPermissions(c.GetString("username"), record.Slug)
 
-
-    // Check if requester is owner
-    c.Get("userToken")
-
-
-    c.JSON(http.StatusOK, response)
-    //c.DataFromReader(http.StatusOK,
-    //   int64(len(response.Username)),
-    //   gin.MIMEJSON,
-    //   strings.NewReader(response.Username), nil)
+    c.JSON(http.StatusOK, gin.H{
+        "record":      record,
+        "permissions": permissions,
+    })
 }
 
 func (cec *ShortenController) UpdateRecord(c *gin.Context) {
     var updateRecordRequest service.UpdateRecordParams
     _ = c.ShouldBindJSON(&updateRecordRequest)
 
-    ctxUsername, exists := c.Get("username")
-    if exists {
-        updateRecordRequest.Username = fmt.Sprintf("%s", ctxUsername)
+    username := c.GetString("username")
+    if username == "" {
+        c.AbortWithStatusJSON(400, gin.H{
+            "error": "User not found!",
+        })
+        return
+    }
+
+    permissions, _ := cec.getPermissions(username, updateRecordRequest.Slug)
+    if permissions["updateContent"] == false {
+        c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+            "error": "Not allowed to update!",
+        })
+        return
     }
 
     srv := service.NewService(cec.dataStore, cec.validator)
@@ -106,17 +81,22 @@ func (cec *ShortenController) UpdateRecord(c *gin.Context) {
         return
     }
 
-    //fullEndpointURL := utils.GetFullHTTPUrl(c.Request.Host, response.Endpoint, c.Request.TLS != nil)
-    c.JSON(200, response.Record)
+    record := response.Record
+
+    c.JSON(http.StatusOK, gin.H{
+        "record": record,
+        "permissions": permissions,
+    })
 }
 
 func (cec *ShortenController) InitialRecord(c *gin.Context) {
 
-    ctxUsername, _ := c.Get("username")
-    if ctxUsername.(string) == "" {
+    ctxUsername := c.GetString("username")
+    if ctxUsername == "" {
         c.AbortWithStatusJSON(400, gin.H{
             "error": "User not found!",
         })
+        return
     }
 
     srv := service.NewService(cec.dataStore, cec.validator)
@@ -127,26 +107,25 @@ func (cec *ShortenController) InitialRecord(c *gin.Context) {
     content, _ := json.Marshal(M{})
 
     params := service.AddRecordParams{
-        Username: ctxUsername.(string),
+        Username: ctxUsername,
         Slug:     randomSlug,
         Content:  string(content),
     }
-    record, err := srv.AddRecord(params)
+    response, err := srv.AddRecord(params)
     if err != nil {
         panic(err)
     }
 
-
-    token, exists := c.Get("userToken")
-    if exists != true {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "message": "test",
-        })
-        return
-    }
+    record := response.Record
+    permissions, _ := cec.getPermissions(c.GetString("username"), record.Slug)
 
     c.JSON(http.StatusOK, gin.H{
-        "record": record.Record,
-        "token": token,
+        "record": record,
+        "permissions": permissions,
     })
+}
+
+func (cec *ShortenController) getPermissions(username string, slug string) (map[string]bool, error) {
+    permissionService := service.NewPermissionService(cec.dataStore)
+    return permissionService.GetPermissionsBySlug(username, slug)
 }

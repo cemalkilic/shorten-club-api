@@ -35,14 +35,6 @@ func (srv *jsonService) GetContentBySlug(params GetContentParams) (GetResponse, 
         return GetResponse{}, errors.New("empty URI given")
     }
 
-    //urlParts := strings.Split(slug, "/")
-    //username := urlParts[0]
-    //if len(urlParts[1:]) < 1 {
-    //  return GetResponse{}, errors.New("URI given without custom endpoint")
-    //}
-
-    //userEndpoint := strings.Join(urlParts[1:], "/")
-
     record, err := srv.db.SelectBySlug(slug)
     if err != nil {
         return GetResponse{}, err
@@ -55,17 +47,8 @@ func (srv *jsonService) GetContentBySlug(params GetContentParams) (GetResponse, 
         return GetResponse{}, errors.New("404: Not Found")
     }
 
-    // at its simplest
-    permissions := map[string]bool{"readContent": true, "updateContent": false}
-    if params.Username != "" {
-        permissions["updateContent"] = true
-    }
-
     return GetResponse{
-        Username: record.Username,
-        Slug:     record.Slug,
-        Content:  record.Content,
-        Permissions: permissions,
+        Record: record,
         Err:      nil,
     }, nil
 }
@@ -121,11 +104,6 @@ func (srv *jsonService) AddRecord(params AddRecordParams) (AddRecordResponse, er
 }
 
 func (srv *jsonService) UpdateRecord(params UpdateRecordParams) (UpdateRecordResponse, error) {
-    // Prepend with a slash to behave it like a uri
-    //if !strings.HasPrefix(params.Endpoint, "/") {
-    //    params.Endpoint = "/" + params.Endpoint
-    //}
-
     // Terminate the request if the input is not valid
     if err := srv.validate.ValidateStruct(params); err != nil {
         return UpdateRecordResponse{}, err
@@ -133,12 +111,6 @@ func (srv *jsonService) UpdateRecord(params UpdateRecordParams) (UpdateRecordRes
 
     // Trim the slashes after validation :/ That's way easier than custom validation
     params.Slug = strings.Trim(params.Slug, "/")
-
-    // Use the default username if not exists in the params
-    username := params.Username
-    if username == "" {
-        username = "guest"
-    }
 
     // Make sure record to update exists
     response, err := srv.db.SelectBySlug(params.Slug)
@@ -151,7 +123,6 @@ func (srv *jsonService) UpdateRecord(params UpdateRecordParams) (UpdateRecordRes
     }
 
     recordObj := models.Record{
-        Username:   username,
         Slug:       params.Slug, // TODO
         Content:    params.Content,
     }
@@ -163,12 +134,16 @@ func (srv *jsonService) UpdateRecord(params UpdateRecordParams) (UpdateRecordRes
         return UpdateRecordResponse{}, err
     }
 
+    recordObj, err = srv.db.SelectBySlug(recordObj.Slug)
+    if err != nil {
+        return UpdateRecordResponse{}, err
+    }
+
     return UpdateRecordResponse{
         Record:   recordObj,
         Err:      nil,
     }, nil
 }
-
 
 func (srv *jsonService) GetRandomSlug() string {
     var randSlug string
@@ -181,7 +156,6 @@ func (srv *jsonService) GetRandomSlug() string {
     }
     return randSlug
 }
-
 
 func randomSlug() string {
     return StringWithCharset(6, "0123456789")

@@ -62,12 +62,14 @@ func (controller *LoginController) Login(c *gin.Context) {
     })
 }
 
-func (controller *LoginController) Signup(c *gin.Context) {
+func (controller *LoginController) Auth(c *gin.Context) {
     // Hacky way to pass user creation if authorization header exists
     authToken := c.GetHeader("Authorization")
     if authToken != "" {
         fmt.Print("Request with authorization header. Skipping create user!")
-        c.Next()
+        c.AbortWithStatusJSON(http.StatusOK, gin.H{
+            "token": authToken,
+        })
         return
     }
 
@@ -93,6 +95,8 @@ func (controller *LoginController) Signup(c *gin.Context) {
         return
     }
 
-
-    c.Set("userTokenAsBearer", "Bearer " + token)
+    c.AbortWithStatusJSON(http.StatusOK, gin.H{
+        "token": token,
+    })
+    return
 }

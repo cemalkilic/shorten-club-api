@@ -47,19 +47,22 @@ func main() {
     loginController := controllers.NewLoginController(loginService, jwtService)
 
     router.POST("/login", loginController.Login)
-    router.POST("/signup", loginController.Signup)
-    router.GET("/user/me", middlewares.AuthorizeJWT(jwtService), func(context *gin.Context) {
+    router.POST("/signup", loginController.Auth)
+
+    router.Use(middlewares.AuthorizeJWT(jwtService))
+
+    router.GET("/user/me", func(context *gin.Context) {
         context.JSON(200, gin.H{
             "success": true,
         })
     })
 
-    router.GET("/initial", loginController.Signup, middlewares.AuthorizeJWT(jwtService), shortenController.InitialRecord)
+    router.GET("/initial", middlewares.RequireJWTToken(jwtService), shortenController.InitialRecord)
+    router.GET("/auth", loginController.Auth)
 
     // Default handler to handle user routes
     router.NoRoute(shortenController.GetContent)
-    router.POST("/addRecord", middlewares.AuthorizeJWT(jwtService), shortenController.AddRecord)
-    router.POST("/updateRecord", middlewares.AuthorizeJWT(jwtService), shortenController.UpdateRecord)
+    router.POST("/updateRecord",  middlewares.RequireJWTToken(jwtService), shortenController.UpdateRecord)
 
     router.Run(cfg.ServerAddress)
 }

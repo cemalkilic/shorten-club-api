@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+    "errors"
     "fmt"
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/dgrijalva/jwt-go"
@@ -10,48 +11,29 @@ import (
     "github.com/gin-gonic/gin"
 )
 
+const BearerSchema = "Bearer"
+
+// AuthorizeJWT Authorizes user by validating the token in Authorization header
+// if no authorization header value is given, just passes
 func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc{
     return func(c *gin.Context) {
-        const BearerSchema = "Bearer"
 
         authToken := c.GetHeader("Authorization")
         if authToken == "" {
-            ctxToken, exists := c.Get("userTokenAsBearer")
-            fmt.Printf("\n\nctxToken: %s\n\n", ctxToken)
-            if exists == false {
-                c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-                    "error": "Authorization token is not given!",
-                })
-                return
-            }
-
-            // TODO :: Check what happens when ctxToken is not string
-            authToken = ctxToken.(string)
-
-            /*
-            c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-                "error": "Authorization token is not given!",
-            })
+            c.Next()
             return
-            */
         }
 
-
-        fmt.Printf("\nauth token:: %s\n", authToken)
-
-        if !strings.HasPrefix(authToken, BearerSchema) {
-            c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-                "error": "Authorization token must be type of Bearer!",
+        err := requireJWTToken(c.GetHeader("Authorization"))
+        if err != nil {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+                "error": err.Error(),
             })
             return
         }
 
         tokenString := authToken[len(BearerSchema):]
         tokenString = strings.TrimSpace(tokenString)
-
-
-        c.Set("userToken", tokenString)
-        fmt.Printf("\n\ntokenstring: %s\n\n", tokenString)
 
         token, err := jwtService.ValidateToken(tokenString)
         if err != nil {
@@ -64,12 +46,40 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc{
 
         if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
             c.Set("username", claims["username"])
-            //c.Next()
+            c.Next()
         } else {
-            c.JSON(http.StatusUnauthorized, gin.H{
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
                 "error": "Given JWT is invalid!",
             })
             return
         }
     }
+}
+
+func RequireJWTToken(jwtService service.JWTService) gin.HandlerFunc {
+    return func(c *gin.Context) {
+
+        err := requireJWTToken(c.GetHeader("Authorization"))
+        if err != nil {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+                "error": err.Error(),
+            })
+            return
+        }
+    }
+}
+
+func requireJWTToken(tokenString string) error {
+
+    if tokenString == "" {
+        return errors.New("authorization token is not given")
+    }
+
+    fmt.Printf("\nAuth token :: %s\n", tokenString)
+
+    if !strings.HasPrefix(tokenString, BearerSchema) {
+         return errors.New("invalid authorization token type")
+    }
+
+    return nil
 }
