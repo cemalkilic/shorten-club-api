@@ -55,10 +55,17 @@ func (srv *jsonService) GetContentBySlug(params GetContentParams) (GetResponse, 
         return GetResponse{}, errors.New("404: Not Found")
     }
 
+    // at its simplest
+    permissions := map[string]bool{"readContent": true, "updateContent": false}
+    if params.Username != "" {
+        permissions["updateContent"] = true
+    }
+
     return GetResponse{
         Username: record.Username,
         Slug:     record.Slug,
         Content:  record.Content,
+        Permissions: permissions,
         Err:      nil,
     }, nil
 }

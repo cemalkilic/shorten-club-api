@@ -54,8 +54,10 @@ func (cec *ShortenController) AddRecord(c *gin.Context) {
 func (cec *ShortenController) GetContent(c *gin.Context) {
     url := c.Request.URL.Path
 
+    username := c.Query("username")
+
     srv := service.NewService(cec.dataStore, cec.validator)
-    response, err := srv.GetContentBySlug(service.GetContentParams{Slug: url})
+    response, err := srv.GetContentBySlug(service.GetContentParams{Slug: url, Username: username})
     if err != nil {
         internalError(c, err)
         return
