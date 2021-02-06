@@ -1,7 +1,6 @@
 package controllers
 
 import (
-    "encoding/json"
     "github.com/cemalkilic/shorten-backend/database"
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/cemalkilic/shorten-backend/utils/validator"
@@ -108,14 +107,11 @@ func (cec *ShortenController) InitialRecord(c *gin.Context) {
 
     randomSlug := srv.GetRandomSlug()
 
-    type M map[string]interface{}
-    content, _ := json.Marshal(M{})
-
     params := service.AddRecordParams{
         Username: ctxUsername,
         Slug:     randomSlug,
         Type:     recordType,
-        Content:  string(content),
+        Content:  make([]string, 0),
     }
     response, err := srv.AddRecord(params)
     if err != nil {
