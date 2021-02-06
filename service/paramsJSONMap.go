@@ -14,6 +14,7 @@ type GetResponse struct {
 type AddRecordParams struct {
     Username   string `json:"username" validate:"omitempty,alphanum"`
     Slug       string `json:"slug" validate:"required,numeric"`
+    Type       string `json:"type" validate:"required"`
     Content    interface{} `json:"content"` // validate:"required"`
 }
 
@@ -24,6 +25,7 @@ type AddRecordResponse struct {
 
 type UpdateRecordParams struct {
     Slug       string `json:"slug" validate:"required,numeric"`
+    Type       string `json:"type"`
     Content    interface{} `json:"content"` // validate:"required"`
 }
 

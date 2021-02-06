@@ -99,6 +99,11 @@ func (cec *ShortenController) InitialRecord(c *gin.Context) {
         return
     }
 
+    recordType := c.Query("type")
+    if recordType == "" {
+        recordType = "LINK" // TODO :: must check enums! LINK vs NOTE
+    }
+
     srv := service.NewService(cec.dataStore, cec.validator)
 
     randomSlug := srv.GetRandomSlug()
@@ -109,6 +114,7 @@ func (cec *ShortenController) InitialRecord(c *gin.Context) {
     params := service.AddRecordParams{
         Username: ctxUsername,
         Slug:     randomSlug,
+        Type:     recordType,
         Content:  string(content),
     }
     response, err := srv.AddRecord(params)

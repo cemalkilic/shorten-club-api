@@ -27,7 +27,7 @@ func GetSQLUserStore(db *sql.DB) UserStore {
 }
 
 func (s *sqlDatabase) Insert(record models.Record) error {
-    insertRecordSQL := `INSERT INTO records(username, slug, content) VALUES (?, ?, ?)`
+    insertRecordSQL := `INSERT INTO records(username, slug, type, content) VALUES (?, ?, ?, ?)`
     statement, err := s.db.Prepare(insertRecordSQL)
     if err != nil {
         log.Fatal(err)
@@ -35,7 +35,7 @@ func (s *sqlDatabase) Insert(record models.Record) error {
     }
 
     content, _ := json.Marshal(record.Content)
-    _, err = statement.Exec(record.Username, record.Slug, content)
+    _, err = statement.Exec(record.Username, record.Slug, record.Type, content)
     if err != nil {
         return err
     }
@@ -53,10 +53,11 @@ func (s *sqlDatabase) Select(username string, slug string) (models.Record, error
     var idResp int64
     var usernameResp string
     var slugResp string
+    var typeResp string
     var contentResp interface{}
 
     for rows.Next() { // Iterate and fetch the records from result cursor
-        rows.Scan(&idResp, &usernameResp, &slugResp, &contentResp)
+        rows.Scan(&idResp, &usernameResp, &slugResp, &typeResp, &contentResp)
     }
     if err := rows.Err(); err != nil {
         return models.Record{}, err
@@ -66,6 +67,7 @@ func (s *sqlDatabase) Select(username string, slug string) (models.Record, error
         ID:         idResp,
         Username:   usernameResp,
         Slug:       slugResp,
+        Type:       typeResp,
         Content:    contentResp,
     }, nil
 }
@@ -85,13 +87,14 @@ func (s *sqlDatabase) SelectBySlug(slug string) (models.Record, error) {
     var idResp int64
     var usernameResp string
     var slugResp string
+    var typeResp string
     var contentResp string
     var expire_at time.Time
     var created_at time.Time
     var updated_at time.Time
 
     for rows.Next() { // Iterate and fetch the records from result cursor
-        rows.Scan(&idResp, &usernameResp, &slugResp, &contentResp, &expire_at, &created_at, &updated_at)
+        rows.Scan(&idResp, &usernameResp, &slugResp, &typeResp, &contentResp, &expire_at, &created_at, &updated_at)
     }
     if err := rows.Err(); err != nil {
         panic(err)
@@ -105,6 +108,7 @@ func (s *sqlDatabase) SelectBySlug(slug string) (models.Record, error) {
         ID:         idResp,
         Username:   usernameResp,
         Slug:       slugResp,
+        Type:       typeResp,
         Content:    result,
     }, nil
 }

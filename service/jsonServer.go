@@ -86,6 +86,7 @@ func (srv *jsonService) AddRecord(params AddRecordParams) (AddRecordResponse, er
     recordObj := models.Record{
         Username:   username,
         Slug:       params.Slug, // TODO
+        Type:       params.Type,
         Content:    params.Content,
     }
 
