@@ -22,5 +22,8 @@ func NewMySQLDBHandler(cfg *config.Config) *sql.DB {
         log.Fatal(err)
     }
 
+    // Should be enough?
+    database.SetMaxOpenConns(60)
+
     return database
 }
