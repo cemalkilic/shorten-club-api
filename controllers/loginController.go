@@ -6,6 +6,7 @@ import (
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/gin-gonic/gin"
     "crypto/rand"
+    "github.com/golang/glog"
     "net/http"
 )
 
@@ -66,7 +67,7 @@ func (controller *LoginController) Auth(c *gin.Context) {
     // Hacky way to pass user creation if authorization header exists
     authToken := c.GetHeader("Authorization")
     if authToken != "" {
-        fmt.Print("Request with authorization header. Skipping create user!")
+        glog.Info("Request with authorization header. Skipping create user!")
         c.AbortWithStatusJSON(http.StatusOK, gin.H{
             "token": authToken,
         })

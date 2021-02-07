@@ -2,7 +2,6 @@ package service
 
 import (
     "errors"
-    "fmt"
     "github.com/cemalkilic/shorten-backend/database"
     "github.com/cemalkilic/shorten-backend/models"
     "github.com/cemalkilic/shorten-backend/utils/validator"
@@ -39,8 +38,6 @@ func (srv *jsonService) GetContentBySlug(params GetContentParams) (GetResponse, 
     if err != nil {
         return GetResponse{}, err
     }
-
-    fmt.Printf("\n%#v\n\n", record)
 
     if record.ID == 0 {
         // not found the custom endpoint
@@ -90,8 +87,6 @@ func (srv *jsonService) AddRecord(params AddRecordParams) (AddRecordResponse, er
         Content:    params.Content,
     }
 
-    fmt.Printf("\n%#v\n\n", recordObj)
-
     err = srv.db.Insert(recordObj)
     if err != nil {
         return AddRecordResponse{}, err
@@ -127,8 +122,6 @@ func (srv *jsonService) UpdateRecord(params UpdateRecordParams) (UpdateRecordRes
         Slug:       params.Slug, // TODO
         Content:    params.Content,
     }
-
-    fmt.Printf("\nupdate: %#v\n\n", recordObj)
 
     err = srv.db.UpdateBySlug(recordObj)
     if err != nil {

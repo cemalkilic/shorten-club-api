@@ -97,7 +97,6 @@ func (s *sqlDatabase) SelectBySlug(slug string) (models.Record, error) {
         rows.Scan(&idResp, &usernameResp, &slugResp, &typeResp, &contentResp, &expire_at, &created_at, &updated_at)
     }
     if err := rows.Err(); err != nil {
-        panic(err)
         return models.Record{}, err
     }
 

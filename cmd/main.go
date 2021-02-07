@@ -1,6 +1,7 @@
 package main
 
 import (
+    "flag"
     "github.com/cemalkilic/shorten-backend/config"
     "github.com/cemalkilic/shorten-backend/controllers"
     "github.com/cemalkilic/shorten-backend/database"
@@ -8,6 +9,8 @@ import (
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/cemalkilic/shorten-backend/utils/validator"
     "github.com/gin-gonic/gin"
+    ginglog "github.com/szuecs/gin-glog"
+    "time"
 )
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -27,12 +30,16 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 func main() {
+    flag.Parse()
     cfg, _ := config.LoadConfig(".")
     if cfg.GinMode == "release" {
         gin.SetMode(cfg.GinMode)
     }
 
-    router := gin.Default()
+    router := gin.New()
+
+    router.Use(ginglog.Logger(3 * time.Second))
+    router.Use(gin.Recovery())
     router.Use(CORSMiddleware())
 
     mysqlHandler := database.NewMySQLDBHandler(cfg)

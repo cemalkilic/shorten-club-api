@@ -5,6 +5,7 @@ import (
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/cemalkilic/shorten-backend/utils/validator"
     "github.com/gin-gonic/gin"
+    "github.com/golang/glog"
     "net/http"
 )
 
@@ -115,7 +116,7 @@ func (cec *ShortenController) InitialRecord(c *gin.Context) {
     }
     response, err := srv.AddRecord(params)
     if err != nil {
-        panic(err)
+        glog.Error("Could not add record: " + err.Error())
     }
 
     record := response.Record

@@ -2,9 +2,9 @@ package middlewares
 
 import (
     "errors"
-    "fmt"
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/dgrijalva/jwt-go"
+    "github.com/golang/glog"
     "net/http"
     "strings"
 
@@ -37,7 +37,7 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc{
 
         token, err := jwtService.ValidateToken(tokenString)
         if err != nil {
-            fmt.Printf("%v", err)
+            glog.Info("Request with an invalid JWT token!: " + err.Error())
             c.AbortWithStatusJSON(400, gin.H{
                 "error": "Given token is invalid!",
             })
@@ -74,8 +74,6 @@ func requireJWTToken(tokenString string) error {
     if tokenString == "" {
         return errors.New("authorization token is not given")
     }
-
-    fmt.Printf("\nAuth token :: %s\n", tokenString)
 
     if !strings.HasPrefix(tokenString, BearerSchema) {
          return errors.New("invalid authorization token type")
