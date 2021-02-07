@@ -27,11 +27,13 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 func main() {
+    cfg, _ := config.LoadConfig(".")
+    if cfg.GinMode == "release" {
+        gin.SetMode(cfg.GinMode)
+    }
+
     router := gin.Default()
     router.Use(CORSMiddleware())
-
-
-    cfg, _ := config.LoadConfig(".")
 
     mysqlHandler := database.NewMySQLDBHandler(cfg)
     dataStore := database.GetSQLDataStore(mysqlHandler)
