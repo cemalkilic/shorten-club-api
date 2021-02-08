@@ -15,6 +15,7 @@ type Config struct {
     MysqlDb   string `mapstructure:"MYSQL_DB"`
     MysqlPort string `mapstructure:"MYSQL_PORT"`
     MysqlHost string `mapstructure:"MYSQL_HOST"`
+    MysqlMaxConnection int `mapstructure:"MYSQL_MAX_CONNECTION"`
 
     JwtSecret string `mapstructure:"JWT_SECRET"`
     JwtIssuer string `mapstructure:"JWT_ISSUER"`

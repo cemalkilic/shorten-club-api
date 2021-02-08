@@ -23,7 +23,7 @@ func NewMySQLDBHandler(cfg *config.Config) *sql.DB {
     }
 
     // Should be enough?
-    database.SetMaxOpenConns(60)
+    database.SetMaxOpenConns(cfg.MysqlMaxConnection)
 
     return database
 }
