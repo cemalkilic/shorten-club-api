@@ -31,7 +31,7 @@ func (srv *jsonService) GetContentBySlug(params GetContentParams) (GetResponse, 
 
     slug := strings.Trim(params.Slug, "/")
     if len(slug) == 0 {
-        return GetResponse{}, errors.New("empty URI given")
+        return GetResponse{Err: errors.New("empty URI given")}, nil
     }
 
     record, err := srv.db.SelectBySlug(slug)
@@ -41,7 +41,7 @@ func (srv *jsonService) GetContentBySlug(params GetContentParams) (GetResponse, 
 
     if record.ID == 0 {
         // not found the custom endpoint
-        return GetResponse{}, errors.New("404: Not Found")
+        return GetResponse{Err: errors.New("404: Not Found")}, nil
     }
 
     return GetResponse{
@@ -115,7 +115,7 @@ func (srv *jsonService) UpdateRecord(params UpdateRecordParams) (UpdateRecordRes
     }
 
     if response.ID == 0 {
-        return UpdateRecordResponse{}, errors.New("endpoint not exists")
+        return UpdateRecordResponse{Err: errors.New("object not found to udpate")}, nil
     }
 
     recordObj := models.Record{

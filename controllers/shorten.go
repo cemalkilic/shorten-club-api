@@ -31,12 +31,17 @@ func (cec *ShortenController) GetContent(c *gin.Context) {
     srv := service.NewService(cec.dataStore, cec.validator)
     response, err := srv.GetContentBySlug(service.GetContentParams{Slug: url})
     if err != nil {
-        internalError(c, err)
+        glog.Error(err)
+        c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+            "error": "Internal server occurred",
+        })
         return
     }
 
     if e, ok := response.Err.(error); ok && e != nil {
-        internalError(c, e)
+        c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+            "error": e.Error(),
+        })
         return
     }
 
@@ -72,12 +77,17 @@ func (cec *ShortenController) UpdateRecord(c *gin.Context) {
     srv := service.NewService(cec.dataStore, cec.validator)
     response, err := srv.UpdateRecord(updateRecordRequest)
     if err != nil {
-        internalError(c, err)
+        glog.Error(err)
+        c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+            "error": "Internal server occurred",
+        })
         return
     }
 
     if e, ok := response.Err.(error); ok && e != nil {
-        internalError(c, e)
+        c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+            "error": e.Error(),
+        })
         return
     }
 
