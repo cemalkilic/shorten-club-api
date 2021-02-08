@@ -36,7 +36,7 @@ func (service *jwtServices) GenerateToken(username string) (string, error) {
         jwt.StandardClaims{
             Issuer:    service.issuer,
             IssuedAt:  time.Now().Unix(),
-            ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+            ExpiresAt: time.Now().Add(time.Hour * 8760).Unix(), // 365 days
         },
     }
 
