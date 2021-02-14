@@ -77,5 +77,5 @@ func main() {
 
     router.GET("/healthcheckz", healthCheckController.HealthCheck)
 
-    router.Run(cfg.ServerAddress)
+    router.Run(cfg.ServerAddress + ":" + cfg.ServerPort)
 }

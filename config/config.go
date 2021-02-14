@@ -1,7 +1,6 @@
 package config
 
 import (
-    "fmt"
     "github.com/spf13/viper"
     "log"
 )
@@ -9,6 +8,7 @@ import (
 type Config struct {
     GinMode       string `mapstructure:"GIN_MODE"`
     ServerAddress string `mapstructure:"SERVER_ADDRESS"`
+    ServerPort    string `mapstructure:"SERVER_PORT"`
 
     MysqlUser string `mapstructure:"MYSQL_USER"`
     MysqlPass string `mapstructure:"MYSQL_PASS"`
@@ -37,8 +37,6 @@ func LoadConfig(path string) (config *Config, err error) {
     }
 
     err = viper.Unmarshal(&config)
-
-    fmt.Printf("%#v", config)
 
     return
 }
