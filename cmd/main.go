@@ -55,6 +55,8 @@ func main() {
     jwtService := service.JWTAuthService(cfg)
     loginController := controllers.NewLoginController(loginService, jwtService)
 
+    healthCheckController := controllers.NewHealthCheckController(mysqlHandler)
+
     router.POST("/login", loginController.Login)
     router.POST("/signup", loginController.Auth)
 
@@ -72,6 +74,8 @@ func main() {
     // Default handler to handle user routes
     router.NoRoute(shortenController.GetContent)
     router.POST("/updateRecord",  middlewares.RequireJWTToken(jwtService), shortenController.UpdateRecord)
+
+    router.GET("/healthcheckz", healthCheckController.HealthCheck)
 
     router.Run(cfg.ServerAddress)
 }
