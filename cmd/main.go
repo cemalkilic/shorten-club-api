@@ -56,26 +56,22 @@ func main() {
     loginController := controllers.NewLoginController(loginService, jwtService)
 
     healthCheckController := controllers.NewHealthCheckController(mysqlHandler)
-
-    router.POST("/login", loginController.Login)
-    router.POST("/signup", loginController.Auth)
+    router.GET("/healthcheckz", healthCheckController.HealthCheck)
 
     router.Use(middlewares.AuthorizeJWT(jwtService))
 
-    router.GET("/user/me", func(context *gin.Context) {
-        context.JSON(200, gin.H{
-            "success": true,
-        })
-    })
+    authorized := router.Group("/")
+    // Routes that are not available without a valid JWT token
+    authorized.Use(middlewares.RequireJWTToken(jwtService))
+    {
+        authorized.GET("/initial", shortenController.InitialRecord)
+        authorized.POST("/updateRecord", shortenController.UpdateRecord)
+    }
 
-    router.GET("/initial", middlewares.RequireJWTToken(jwtService), shortenController.InitialRecord)
     router.GET("/auth", loginController.Auth)
 
     // Default handler to handle user routes
     router.NoRoute(shortenController.GetContent)
-    router.POST("/updateRecord",  middlewares.RequireJWTToken(jwtService), shortenController.UpdateRecord)
-
-    router.GET("/healthcheckz", healthCheckController.HealthCheck)
 
     router.Run(cfg.ServerAddress + ":" + cfg.ServerPort)
 }
