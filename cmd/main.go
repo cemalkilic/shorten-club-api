@@ -13,9 +13,9 @@ import (
     "time"
 )
 
-func CORSMiddleware() gin.HandlerFunc {
+func CORSMiddleware(allowOrigins string) gin.HandlerFunc {
     return func(c *gin.Context) {
-        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Origin", allowOrigins)
         c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
         c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
         c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
@@ -40,7 +40,7 @@ func main() {
 
     router.Use(ginglog.Logger(3 * time.Second))
     router.Use(gin.Recovery())
-    router.Use(CORSMiddleware())
+    router.Use(CORSMiddleware(cfg.CORSAllowOrigins))
 
     mysqlHandler := database.NewMySQLDBHandler(cfg)
     dataStore := database.GetSQLDataStore(mysqlHandler)

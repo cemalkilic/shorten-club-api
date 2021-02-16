@@ -10,6 +10,8 @@ type Config struct {
     ServerAddress string `mapstructure:"SERVER_ADDRESS"`
     ServerPort    string `mapstructure:"SERVER_PORT"`
 
+    CORSAllowOrigins string `mapstructure:"CORS_ALLOW_ORIGINS"`
+
     MysqlUser string `mapstructure:"MYSQL_USER"`
     MysqlPass string `mapstructure:"MYSQL_PASS"`
     MysqlDb   string `mapstructure:"MYSQL_DB"`
