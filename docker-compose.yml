@@ -24,7 +24,6 @@ services:
     volumes:
       - db-data/:/var/lib/mysql
       - "./database/scripts/schema.sql:/docker-entrypoint-initdb.d/1.sql"
-      - $HOME/Desktop/MySQL-Snippets/school.sql:/school.sql
 volumes:
   db-data:
 

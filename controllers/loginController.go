@@ -1,11 +1,11 @@
 package controllers
 
 import (
+    "crypto/rand"
     "fmt"
     "github.com/cemalkilic/shorten-backend/models"
     "github.com/cemalkilic/shorten-backend/service"
     "github.com/gin-gonic/gin"
-    "crypto/rand"
     "github.com/golang/glog"
     "net/http"
 )
