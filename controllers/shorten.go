@@ -21,14 +21,14 @@ func NewShortenController(db database.DataStore, v *validator.CustomValidator) *
     }
 }
 
-func (cec *ShortenController) SetDB(dataStore database.DataStore) {
-    cec.dataStore = dataStore
+func (sc *ShortenController) SetDB(dataStore database.DataStore) {
+    sc.dataStore = dataStore
 }
 
-func (cec *ShortenController) GetContent(c *gin.Context) {
+func (sc *ShortenController) GetContent(c *gin.Context) {
     url := c.Request.URL.Path
 
-    srv := service.NewService(cec.dataStore, cec.validator)
+    srv := service.NewService(sc.dataStore, sc.validator)
     response, err := srv.GetContentBySlug(service.GetContentParams{Slug: url})
     if err != nil {
         glog.Error(err)
@@ -46,7 +46,7 @@ func (cec *ShortenController) GetContent(c *gin.Context) {
     }
 
     record := response.Record
-    permissions, _ := cec.getPermissions(c.GetString("username"), record.Slug)
+    permissions, _ := sc.getPermissions(c.GetString("username"), record.Slug)
 
     c.JSON(http.StatusOK, gin.H{
         "record":      record,
@@ -54,7 +54,7 @@ func (cec *ShortenController) GetContent(c *gin.Context) {
     })
 }
 
-func (cec *ShortenController) UpdateRecord(c *gin.Context) {
+func (sc *ShortenController) UpdateRecord(c *gin.Context) {
     var updateRecordRequest service.UpdateRecordParams
     _ = c.ShouldBindJSON(&updateRecordRequest)
 
@@ -66,7 +66,7 @@ func (cec *ShortenController) UpdateRecord(c *gin.Context) {
         return
     }
 
-    permissions, _ := cec.getPermissions(username, updateRecordRequest.Slug)
+    permissions, _ := sc.getPermissions(username, updateRecordRequest.Slug)
     if permissions["updateContent"] == false {
         c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
             "error": "Not allowed to update!",
@@ -74,7 +74,7 @@ func (cec *ShortenController) UpdateRecord(c *gin.Context) {
         return
     }
 
-    srv := service.NewService(cec.dataStore, cec.validator)
+    srv := service.NewService(sc.dataStore, sc.validator)
     response, err := srv.UpdateRecord(updateRecordRequest)
     if err != nil {
         glog.Error(err)
@@ -99,7 +99,7 @@ func (cec *ShortenController) UpdateRecord(c *gin.Context) {
     })
 }
 
-func (cec *ShortenController) InitialRecord(c *gin.Context) {
+func (sc *ShortenController) InitialRecord(c *gin.Context) {
 
     ctxUsername := c.GetString("username")
     if ctxUsername == "" {
@@ -114,7 +114,7 @@ func (cec *ShortenController) InitialRecord(c *gin.Context) {
         recordType = "LINK" // TODO :: must check enums! LINK vs NOTE
     }
 
-    srv := service.NewService(cec.dataStore, cec.validator)
+    srv := service.NewService(sc.dataStore, sc.validator)
 
     randomSlug := srv.GetRandomSlug()
 
@@ -130,7 +130,7 @@ func (cec *ShortenController) InitialRecord(c *gin.Context) {
     }
 
     record := response.Record
-    permissions, _ := cec.getPermissions(c.GetString("username"), record.Slug)
+    permissions, _ := sc.getPermissions(c.GetString("username"), record.Slug)
 
     c.JSON(http.StatusOK, gin.H{
         "record": record,
@@ -138,7 +138,7 @@ func (cec *ShortenController) InitialRecord(c *gin.Context) {
     })
 }
 
-func (cec *ShortenController) getPermissions(username string, slug string) (map[string]bool, error) {
-    permissionService := service.NewPermissionService(cec.dataStore)
+func (sc *ShortenController) getPermissions(username string, slug string) (map[string]bool, error) {
+    permissionService := service.NewPermissionService(sc.dataStore)
     return permissionService.GetPermissionsBySlug(username, slug)
 }

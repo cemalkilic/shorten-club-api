@@ -10,19 +10,19 @@ import (
     "time"
 )
 
-type jsonService struct {
+type shortenService struct {
     db database.DataStore
     validate *validator.CustomValidator
 }
 
-func NewService(db database.DataStore, v *validator.CustomValidator) *jsonService {
-    return &jsonService{
+func NewService(db database.DataStore, v *validator.CustomValidator) *shortenService {
+    return &shortenService{
         db: db,
         validate: v,
     }
 }
 
-func (srv *jsonService) GetContentBySlug(params GetContentParams) (GetResponse, error) {
+func (srv *shortenService) GetContentBySlug(params GetContentParams) (GetResponse, error) {
 
     // Terminate the request if the input is not valid
     if err := srv.validate.ValidateStruct(params); err != nil {
@@ -50,7 +50,7 @@ func (srv *jsonService) GetContentBySlug(params GetContentParams) (GetResponse, 
     }, nil
 }
 
-func (srv *jsonService) AddRecord(params AddRecordParams) (AddRecordResponse, error) {
+func (srv *shortenService) AddRecord(params AddRecordParams) (AddRecordResponse, error) {
     // Prepend with a slash to behave it like a uri
     //if !strings.HasPrefix(params.Endpoint, "/") {
     //    params.Endpoint = "/" + params.Endpoint
@@ -99,7 +99,7 @@ func (srv *jsonService) AddRecord(params AddRecordParams) (AddRecordResponse, er
     }, nil
 }
 
-func (srv *jsonService) UpdateRecord(params UpdateRecordParams) (UpdateRecordResponse, error) {
+func (srv *shortenService) UpdateRecord(params UpdateRecordParams) (UpdateRecordResponse, error) {
     // Terminate the request if the input is not valid
     if err := srv.validate.ValidateStruct(params); err != nil {
         return UpdateRecordResponse{}, err
@@ -139,7 +139,7 @@ func (srv *jsonService) UpdateRecord(params UpdateRecordParams) (UpdateRecordRes
     }, nil
 }
 
-func (srv *jsonService) GetRandomSlug() string {
+func (srv *shortenService) GetRandomSlug() string {
     var randSlug string
     for {
         randSlug = randomSlug()
