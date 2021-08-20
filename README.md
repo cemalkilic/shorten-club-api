@@ -1,8 +1,8 @@
-# JSONServer
-An app that helps developers get a fake REST API suitable to their needs, with the route and content they specified. 
+# shorten.club API
+URL shortener to voice for Clubhouse. Visit [here](https://github.com/omergulen/shorten-club-frontend) for the detailed product info.
 
-Developed with using Go Gin framework, MySQL and ReactJS.
+This repository contains the backend API code for [shorten.club](https://shorten.club).
 
-Live demo can be found **[here](https://json.cemalkilic.net)**.
+Developed with using Go Gin framework, MySQL.
 
 Filling rest of this is #TODO.
